@@ -133,7 +133,20 @@ function rowReset(row, layer) {
 			run(layers[lr].doReset, layers[lr], layer)
 		}
 		else
-			if(tmp[layer].row > tmp[lr].row && !isNaN(row)) layerDataReset(lr)
+			if(tmp[layer].side == tmp[lr].side && tmp[layer].row > tmp[lr].row && !isNaN(row)) layerDataReset(lr)
+	}
+}
+
+function sideReset(side) {
+	for (row in ROW_LAYERS) {
+		if (isNaN(row)) continue;
+		for (lr in ROW_LAYERS[row]){
+			if(layers[lr].doReset) {
+				run(layers[lr].doReset, layers[lr], true)
+			}
+			else
+				if(side == tmp[lr].side) layerDataReset(lr)
+		}
 	}
 }
 

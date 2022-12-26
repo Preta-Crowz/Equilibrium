@@ -1,26 +1,25 @@
 let modInfo = {
-	name: "The ??? Tree",
-	id: "mymod",
-	author: "nobody",
-	pointsName: "points",
+	name: "Equilibrium",
+	id: "eq.siro.dev",
+	author: "Koko Ayame",
+	pointsName: "Posibility",
 	modFiles: ["layers.js", "tree.js"],
 
 	discordName: "",
 	discordLink: "",
-	initialStartPoints: new Decimal (10), // Used for hard resets and new players
-	offlineLimit: 1,  // In hours
+	initialStartPoints: new Decimal (2), // Used for hard resets and new players
+	offlineLimit: 48,  // In hours
 }
 
 // Set your version in num and name
 let VERSION = {
 	num: "0.0",
-	name: "Literally nothing",
+	name: "Equilibrium",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.0</h3><br>
-		- Added things.<br>
-		- Added stuff.`
+		- Added Positive & Negative`
 
 let winText = `Congratulations! You have reached the end and beaten this game, but for now...`
 
@@ -34,7 +33,7 @@ function getStartPoints(){
 
 // Determines if it should show points/sec
 function canGenPoints(){
-	return true
+	return true;
 }
 
 // Calculate points/sec!
@@ -42,8 +41,24 @@ function getPointGen() {
 	if(!canGenPoints())
 		return new Decimal(0)
 
-	let gain = new Decimal(1)
-	return gain
+	let gain = new Decimal(0);
+	gain = gain.add(player["+"].points);
+	gain = gain.add(player["-"].points);
+
+	return gain.mul(getPointFinalMult())
+}
+
+const finalMultList = [
+	["+", 11],
+	["-", 11]
+];
+
+function getPointFinalMult() {
+	mult = new Decimal(1)
+	for (const u of finalMultList) {
+		if (hasUpgrade(...u)) mult = mult.mul(upgradeEffect(...u))
+	}
+	return mult;
 }
 
 // You can add non-layer related variables that should to into "player" and be saved here, along with default values
