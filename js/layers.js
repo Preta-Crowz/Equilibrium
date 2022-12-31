@@ -138,6 +138,7 @@ addLayer("-", {
     startData() { return {
         unlocked: true,
         points: new Decimal(0),
+        epsilon: new Decimal(0),
         resetCount: new Decimal(0)
     }},
     color: "#777777",
@@ -151,6 +152,15 @@ addLayer("-", {
         ],
         [
             "display-text",
+            function () {
+                if (player['-'].epsilon.lte(0)) return `You have ${player['-'].epsilon} epsilon(s), which Multiples NE gain by x1`
+                let epsMult = Decimal.logarithm(player['-'].epsilon.add(1), new Decimal(4)).add(new Decimal(1));
+                return `You have ${player['-'].epsilon} epsilon(s) , which Multiples NE gain by x${epsMult}`
+            },
+            { "color": "#DFDFDF" }
+        ],
+        [
+            "display-text",
             function() { return "Reset on this also resets every layers on Positive side."},
             { "color": "red", "font-size": "16px" }
         ]
@@ -158,12 +168,17 @@ addLayer("-", {
     clickables: {
         11: {
             title: "Self Destruction",
+            display() {
+                if (hasUpgrade('-', 21)) return `Lose 0.4 NE Resets<br>Convert NE to Epsilon<br>Will gain ${player[this.layer].points}ε`;
+                return "Lost 0.4 NE Resets<br>Current NE will reset to 0";
+            },
             unlocked() { return hasUpgrade('-', 14) },
             canClick() { return player[this.layer].points.gt(0) },
             onClick() {
                 player.points = new Decimal(0);
+                if (hasUpgrade('-', 21)) player[this.layer].epsilon = player[this.layer].epsilon.add(player[this.layer].points);
                 player[this.layer].points = new Decimal(0);
-                player[this.layer].resetCount = player[this.layer].resetCount.sub(0.4)
+                player[this.layer].resetCount = player[this.layer].resetCount.sub(0.4);
                 if (player[this.layer].resetCount.lt(0)) player[this.layer].resetCount = new Decimal(0);
             }
         },
@@ -174,6 +189,7 @@ addLayer("-", {
     exponent: 0.6,
     gainMult() {
         mult = new Decimal(1);
+        if (player['-'].epsilon.gt(0)) mult = mult.mul(Decimal.logarithm(player['-'].epsilon.add(1), new Decimal(4)).add(new Decimal(1)));
         return mult;
     },
     gainExp() {
@@ -245,6 +261,11 @@ addLayer("-", {
             title: "Self Destruction",
             description: "Add self destruction to NE, reset current NE count with lose 0.4 reset.",
             cost: new Decimal(30)
+        },
+        21: {
+            title: "Reabsorption",
+            description: "When Self Destruction was triggered, current NE will converted to Epsilon",
+            cost: new Decimal(50)
         }
     }
 })
