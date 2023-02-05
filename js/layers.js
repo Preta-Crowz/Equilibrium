@@ -10,7 +10,7 @@ addLayer("+", {
         best: new Decimal(0),
         bestGain: new Decimal(0)
     }},
-    color: "#CCCCCC",
+    color: "#CCC",
     requires: new Decimal(2),
     resource: "Positive Energy",
     midsection: [
@@ -54,14 +54,14 @@ addLayer("+", {
             }
         }}
     ],
-    layerShown() { return true },
+    layerShown() { return !hasUpgrade('-', 11) },
     onPrestige(n) {
         n = new Decimal(n);
         if (n.lt(1)) return;
         if (n.gt(player[this.layer].bestGain)) player[this.layer].bestGain = n;
         sideReset(0);
     },
-    canReset() { return !hasUpgrade('-', 11) },
+    canReset() { return this.layerShown() },
     parentMultList: [
         ['+', 12]
     ],
@@ -142,7 +142,7 @@ addLayer("-", {
         resetCount: new Decimal(0),
         totalReset: new Decimal(0)
     }},
-    color: "#777777",
+    color: "#777",
     requires: new Decimal(2),
     resource: "Negative Energy",
     midsection: [
@@ -201,7 +201,7 @@ addLayer("-", {
             if (canReset(this.layer)) doReset(this.layer)
         }}
     ],
-    layerShown() { return true },
+    layerShown() { return !hasUpgrade('+', 11) },
     onPrestige(n) {
         n = new Decimal(n);
         if (n.lt(1)) return;
@@ -209,7 +209,7 @@ addLayer("-", {
         player[this.layer].resetCount = player[this.layer].resetCount.add(1);
         player[this.layer].totalReset = player[this.layer].totalReset.add(1);
     },
-    canReset() { return !hasUpgrade('+', 11) },
+    canReset() { return this.layerShown() },
     parentMultList: [
         ['-', 12]
     ],
@@ -279,9 +279,10 @@ addLayer("∞", {
     row: 1,
     position: 2,
     startData() { return {
-        unlocked: true,
+        unlocked: false,
         points: new Decimal(0)
     }},
+    layerShown() { return hasUpgrade('+', 11) },
     color: "#33f",
     requires: new Decimal(2),
     resource: "Infinity Paradox",
@@ -297,9 +298,10 @@ addLayer("ε", {
     row: 1,
     position: 0,
     startData() { return {
-        unlocked: true,
+        unlocked: false,
         points: new Decimal(0)
     }},
+    layerShown() { return hasUpgrade('-', 11) },
     color: "#f33",
     requires: new Decimal(2),
     resource: "Epsilon Paradox",
@@ -315,9 +317,10 @@ addLayer("◎", {
     row: 1,
     position: 1,
     startData() { return {
-        unlocked: true,
+        unlocked: false,
         points: new Decimal(0)
     }},
+    layerShown() { return true/*hasUpgrade('∞', 11) || hasUpgrade('ε', 11)*/ },
     color: "#3f3",
     requires: new Decimal(2),
     resource: "Inception",
