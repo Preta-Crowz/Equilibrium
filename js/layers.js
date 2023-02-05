@@ -16,7 +16,7 @@ addLayer("+", {
     midsection: [
         [
             "display-text",
-            function () { return `Your best PE Gain is ${player['+'].bestGain}` },
+            function () { return `Your best PE Gain is ${player['+'].bestGain.toFixed(3)}` },
             { "color": "#DFDFDF" }
         ],
         [
@@ -103,7 +103,7 @@ addLayer("+", {
             title: "Replicate",
             description: "Best gain of PE will power its gain",
             effectDisplay() {
-                return '^' + (new Decimal(1).add(this.effect().positive.expt).toString())
+                return '^' + (new Decimal(1).add(this.effect().positive.expt).toFixed(2))
             },
             cost: new Decimal(80),
             effect() { return {
@@ -123,7 +123,7 @@ addLayer("+", {
             cost: new Decimal(200),
             effectDisplay() {
                 if (player[this.layer].best.lte(16)) return 'n = 4'
-                return 'n = ' + Decimal.logarithm(4, player[this.layer].best).mul(8).toString();
+                return 'n = ' + Decimal.logarithm(4, player[this.layer].best).mul(8).toFixed(4);
             }
         }
     }
@@ -139,7 +139,8 @@ addLayer("-", {
         unlocked: true,
         points: new Decimal(0),
         epsilon: new Decimal(0),
-        resetCount: new Decimal(0)
+        resetCount: new Decimal(0),
+        totalReset: new Decimal(0)
     }},
     color: "#777777",
     requires: new Decimal(2),
@@ -147,15 +148,15 @@ addLayer("-", {
     midsection: [
         [
             "display-text",
-            function () { return `You resetted for NE ${player['-'].resetCount} time(s)` },
+            function () { return `You resetted for NE ${player['-'].totalReset.toFixed(2)} time(s), effective as ${player['-'].resetCount.toFixed(2)} time(s)` },
             { "color": "#DFDFDF" }
         ],
         [
             "display-text",
             function () {
-                if (player['-'].epsilon.lte(0)) return `You have ${player['-'].epsilon} epsilon(s), which Multiples NE gain by x1`
+                if (player['-'].epsilon.lte(0)) return `You have ${player['-'].epsilon.toFixed(2)} epsilon(s), which Multiples NE gain by x1`
                 let epsMult = Decimal.logarithm(player['-'].epsilon.add(1), new Decimal(4)).add(new Decimal(1));
-                return `You have ${player['-'].epsilon} epsilon(s) , which Multiples NE gain by x${epsMult}`
+                return `You have ${player['-'].epsilon.toFixed(2)} epsilon(s) , which Multiples NE gain by x${epsMult.toFixed(2)}`
             },
             { "color": "#DFDFDF" }
         ],
@@ -169,7 +170,7 @@ addLayer("-", {
         11: {
             title: "Self Destruction",
             display() {
-                if (hasUpgrade('-', 21)) return `Lose 0.4 NE Resets<br>Convert NE to Epsilon<br>Will gain ${player[this.layer].points}ε`;
+                if (hasUpgrade('-', 21)) return `Lose 0.4 NE Resets<br>Convert NE to Epsilon<br>Will gain ${player[this.layer].points.toFixed(2)}ε`;
                 return "Lost 0.4 NE Resets<br>Current NE will reset to 0";
             },
             unlocked() { return hasUpgrade('-', 14) },
@@ -206,6 +207,7 @@ addLayer("-", {
         if (n.lt(1)) return;
         sideReset(1)
         player[this.layer].resetCount = player[this.layer].resetCount.add(1);
+        player[this.layer].totalReset = player[this.layer].totalReset.add(1);
     },
     canReset() { return !hasUpgrade('+', 11) },
     parentMultList: [
@@ -249,7 +251,7 @@ addLayer("-", {
             description: "Can buy max NE, Generate 1.2 P/s per NE Resets",
             cost: new Decimal(10),
             effectDisplay () {
-                return this.effect().point.gen + ' P/s';
+                return this.effect().point.gen.toFixed(2) + ' P/s';
             },
             effect() { return {
                 point: {
@@ -268,4 +270,58 @@ addLayer("-", {
             cost: new Decimal(50)
         }
     }
+})
+
+addLayer("∞", {
+    name: "Infinity",
+    symbol: "∞",
+    side: 1,
+    row: 1,
+    position: 2,
+    startData() { return {
+        unlocked: true,
+        points: new Decimal(0)
+    }},
+    color: "#33f",
+    requires: new Decimal(2),
+    resource: "Infinity Paradox",
+    baseResource: "Positive Energy",
+    baseAmount() { return player['+'].points },
+    branches: ["+", "∞"],
+})
+
+addLayer("ε", {
+    name: "Epsilon",
+    symbol: "ε",
+    side: 0,
+    row: 1,
+    position: 0,
+    startData() { return {
+        unlocked: true,
+        points: new Decimal(0)
+    }},
+    color: "#f33",
+    requires: new Decimal(2),
+    resource: "Epsilon Paradox",
+    baseResource: "Negative Energy",
+    baseAmount() { return player['-'].points },
+    branches: ["-", "ε"],
+})
+
+addLayer("◎", {
+    name: "Inception",
+    symbol: "◎",
+    side: 0,
+    row: 1,
+    position: 1,
+    startData() { return {
+        unlocked: true,
+        points: new Decimal(0)
+    }},
+    color: "#3f3",
+    requires: new Decimal(2),
+    resource: "Inception",
+    baseResource: "Paradox",
+    baseAmount() { return player['∞'].points.add(player['ε'].points) },
+    branches: ["∞", "◎", "ε"],
 })
